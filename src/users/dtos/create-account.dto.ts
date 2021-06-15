@@ -13,5 +13,5 @@ export class CreateAccountOutput {
   @Field(type => Boolean)
   ok: boolean;
   @Field(type => String, { nullable: true })
-  error!: string;
+  error?: string;
 }
