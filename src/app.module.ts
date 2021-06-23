@@ -39,7 +39,7 @@ import { Verification } from './users/entities/verification.entity';
       database: process.env.DB_NAME,
       entities: [User, Verification],
       synchronize: process.env.NODE_ENV !== 'prod',
-      logging: process.env.NODE_ENV !== 'prod',
+      logging: false,
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,

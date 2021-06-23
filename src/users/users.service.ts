@@ -2,9 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { Repository } from 'typeorm';
-import { CreateAccountInput } from './dtos/create-account.dto';
-import { EditProfileInput } from './dtos/edit-profile.dto';
-import { LoginInput } from './dtos/login.dto';
+import {
+  CreateAccountInput,
+  CreateAccountOutput,
+} from './dtos/create-account.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
+import { LoginInput, LoginOutput } from './dtos/login.dto';
+import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
+import { VerifyEmailInput, VerifyEmailOutput } from './dtos/verify-email.dto';
 import { User } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 
@@ -22,7 +27,7 @@ export class UsersService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
+  }: CreateAccountInput): Promise<CreateAccountOutput> {
     try {
       const exists = await this.users.findOne({ email });
       if (exists) {
@@ -32,16 +37,13 @@ export class UsersService {
         this.users.create({ email, password, role }),
       );
       await this.verifications.save(this.verifications.create({ user }));
-      return { ok: true };
+      return { ok: true, error: null };
     } catch (error) {
       return { ok: false, error: "Couldn't create account" };
     }
   }
 
-  async login({
-    email,
-    password,
-  }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
+  async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user = await this.users.findOne(
         { email },
@@ -77,30 +79,56 @@ export class UsersService {
     }
   }
 
-  async findById(id: number): Promise<User> {
-    return await this.users.findOne({ id });
+  async findById({ userId: id }: UserProfileInput): Promise<UserProfileOutput> {
+    try {
+      const user = await this.users.findOne(id);
+      if (user) {
+        return {
+          ok: true,
+          error: null,
+          user,
+        };
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'User Not Found',
+        user: null,
+      };
+    }
   }
 
   async editProfile(
     userId: number,
     { email, password, role }: EditProfileInput,
-  ): Promise<User> {
-    const user = await this.users.findOne(userId);
-    if (email) {
-      user.email = email;
-      user.verified = false;
-      await this.verifications.save(this.verifications.create({ user }));
+  ): Promise<EditProfileOutput> {
+    try {
+      const user = await this.users.findOne(userId);
+      if (email) {
+        user.email = email;
+        user.verified = false;
+        await this.verifications.save(this.verifications.create({ user }));
+      }
+      if (password) {
+        user.password = password;
+      }
+      if (role) {
+        user.role = role;
+      }
+      await this.users.save(user);
+      return {
+        ok: true,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not update profile',
+      };
     }
-    if (password) {
-      user.password = password;
-    }
-    if (role) {
-      user.role = role;
-    }
-    return await this.users.save(user);
   }
 
-  async verifyEmail(code: string): Promise<boolean> {
+  async verifyEmail({ code }: VerifyEmailInput): Promise<VerifyEmailOutput> {
     try {
       const verification = await this.verifications.findOne(
         { code },
@@ -109,12 +137,20 @@ export class UsersService {
       if (verification) {
         verification.user.verified = true;
         this.users.save(verification.user);
-        return true;
+        return {
+          ok: true,
+          error: null,
+        };
       }
-      throw new Error();
+      return {
+        ok: false,
+        error: 'Verification not found',
+      };
     } catch (error) {
-      console.log(error);
-      return false;
+      return {
+        ok: false,
+        error,
+      };
     }
   }
 }
