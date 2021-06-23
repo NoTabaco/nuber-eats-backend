@@ -10,15 +10,22 @@ export class MailService {
     @Inject(CONFIG_OPTIONS)
     private readonly options: MailModuleOptions,
   ) {
-    this.sendEmail('Kimchi', 'good');
+    this.sendEmail('Kimchi', `template_email`);
   }
 
-  private async sendEmail(subject: string, content: string) {
+  private async sendEmail(subject: string, template: string) {
     const form = new FormData();
     form.append('from', `Excited User <mailgun@${this.options.domain}>`);
     form.append('to', `adslonese@gmail.com`);
     form.append('subject', subject);
-    form.append('text', content);
+    form.append('template', template);
+    form.append(
+      'h:X-Mailgun-Variables',
+      `{
+        "username": "Kimchi-King",
+        "code": "Perfect-Kimchi"
+        }`,
+    );
     const response = await got(
       `https://api.mailgun.net/v3/${this.options.domain}/messages`,
       {
