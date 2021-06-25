@@ -78,7 +78,7 @@ export class UsersService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: "Can't log user in",
         token: null,
       };
     }
