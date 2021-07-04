@@ -86,7 +86,17 @@ export class UsersService {
 
   async findById({ userId: id }: UserProfileInput): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOneOrFail(id);
+      const user = await this.users.findOneOrFail(id, {
+        select: [
+          'id',
+          'email',
+          'password',
+          'role',
+          'verified',
+          'createdAt',
+          'updatedAt',
+        ],
+      });
       return {
         ok: true,
         error: null,
@@ -107,9 +117,15 @@ export class UsersService {
   ): Promise<EditProfileOutput> {
     try {
       const user = await this.users.findOne(userId);
+      const existingVerification = await this.verifications.findOne({
+        user: { id: user.id },
+      });
       if (email) {
         user.email = email;
         user.verified = false;
+        if (existingVerification) {
+          await this.verifications.delete({ user: { id: user.id } });
+        }
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );

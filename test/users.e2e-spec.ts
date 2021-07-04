@@ -284,6 +284,186 @@ describe('UserModule (e2e)', () => {
     });
   });
 
-  it.todo('verifyEmail');
-  it.todo('editProfile');
+  describe('editProfile', () => {
+    const NEW_EMAIL = 'kimchi@new.com';
+    const NEW_PASSWORD = '1234';
+    const NEW_ROLE = `Owner`;
+
+    it('should change email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+            mutation {
+              editProfile(
+                input: 
+                { email: "${NEW_EMAIL}" }
+              ) {
+                ok
+                error
+              }
+            }        
+        `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should have new email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+                {
+                  me {
+                    email
+                  }
+                }
+              `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(NEW_EMAIL);
+        });
+    });
+
+    it('should change password', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+            mutation {
+              editProfile(
+                input: 
+                { password: "${NEW_PASSWORD}" }
+              ) {
+                ok
+                error
+              }
+            }        
+        `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should have new password', async () => {
+      const user = await usersRepository.findOne(
+        { email: NEW_EMAIL },
+        { select: ['password'] },
+      );
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+                {
+                  me {
+                    password
+                  }
+                }
+              `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                me: { password },
+              },
+            },
+          } = res;
+          expect(password).toBe(user.password);
+        });
+    });
+
+    it('should change role', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+            mutation {
+              editProfile(
+                input: 
+                { role: ${NEW_ROLE} }
+              ) {
+                ok
+                error
+              }
+            }        
+        `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should have new role', async () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+                {
+                  me {
+                    role
+                  }
+                }
+              `,
+        })
+        .expect(200)
+        .expect(res => {
+          const {
+            body: {
+              data: {
+                me: { role },
+              },
+            },
+          } = res;
+          expect(role).toBe(NEW_ROLE);
+        });
+    });
+  });
+
+  describe('verifyEmail', () => {});
 });
