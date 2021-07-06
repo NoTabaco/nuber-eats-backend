@@ -72,6 +72,7 @@ export class RestaurantService {
           editRestaurantInput.categoryName,
         );
       }
+      // If you provide id property, it is same as an update
       await this.restaurants.save([
         {
           id: editRestaurantInput.restaurantId,
