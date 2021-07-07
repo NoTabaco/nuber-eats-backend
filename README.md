@@ -2,13 +2,10 @@
 
 The Backend of Nuber Eats Clone
 
-- Delete Restaurant
+- See Restaurants by Category (pagination)
+- See Restaurants (pagination)
+- See Restaurant
 
-* See Categories
-* See Restaurants by Category (pagination)
-* See Restaurants (pagination)
-* See Restaurant
-
-- Create Dish
-- Edit Dish
-- Delete Dish
+* Create Dish
+* Edit Dish
+* Delete Dish
