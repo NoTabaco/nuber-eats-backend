@@ -16,6 +16,7 @@ import {
   EditRestaurantInput,
   EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
@@ -169,11 +170,11 @@ export class RestaurantService {
         take: 25,
         skip: (page - 1) * 25,
       });
-      category.restaurants = restaurants;
       const totalResults = await this.countRestaurant(category);
       return {
         ok: true,
         error: null,
+        restaurants,
         category,
         totalPages: Math.ceil(totalResults / 25),
       };
@@ -182,6 +183,29 @@ export class RestaurantService {
         ok: false,
         error: 'Could not load category',
         category: null,
+        totalPages: null,
+      };
+    }
+  }
+
+  async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
+    try {
+      const [restaurants, totalResults] = await this.restaurants.findAndCount({
+        take: 25,
+        skip: (page - 1) * 25,
+      });
+      return {
+        ok: true,
+        error: null,
+        results: restaurants,
+        totalResults,
+        totalPages: Math.ceil(totalResults / 25),
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load restaurants',
+        results: null,
         totalPages: null,
       };
     }
