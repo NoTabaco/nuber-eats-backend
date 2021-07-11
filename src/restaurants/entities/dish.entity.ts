@@ -59,7 +59,7 @@ class DishOption {
 
 @InputType('DishChoiceInputType', { isAbstract: true })
 @ObjectType()
-export class DishChoice {
+class DishChoice {
   @Field(type => String)
   name: string;
 
