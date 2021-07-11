@@ -46,7 +46,7 @@ export class Dish extends CoreEntity {
 
 @InputType('DishOptionInputType', { isAbstract: true })
 @ObjectType()
-export class DishOption {
+class DishOption {
   @Field(type => String)
   name: string;
 
@@ -59,7 +59,7 @@ export class DishOption {
 
 @InputType('DishChoiceInputType', { isAbstract: true })
 @ObjectType()
-class DishChoice {
+export class DishChoice {
   @Field(type => String)
   name: string;
 
