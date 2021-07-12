@@ -2,7 +2,6 @@
 
 The Backend of Nuber Eats Clone
 
-- Orders CRUD
+- Orders RUD
 - Orders Subscription (Owner, Customer, Delivery)
-
 - Payments (CRON)
