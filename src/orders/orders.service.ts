@@ -234,7 +234,7 @@ export class OrderService {
       ]);
       return {
         ok: true,
-        error: 'null',
+        error: null,
       };
     } catch (error) {
       return {
