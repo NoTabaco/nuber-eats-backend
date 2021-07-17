@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { Verification } from './entities/verification.entity';
 import { UsersService } from './users.service';
 
@@ -70,7 +70,7 @@ describe('UserService', () => {
     const createAccountArgs = {
       email: 'bs@email.com',
       password: 'bs.password',
-      role: 0,
+      role: UserRole.Client,
     };
 
     it('should fail if user exists', async () => {
@@ -223,14 +223,15 @@ describe('UserService', () => {
   });
 
   describe('editProfile', () => {
+    const editProfileArgs = {
+      userId: 1,
+      input: { email: 'bs@new.com' },
+    };
+
     it('should change email', async () => {
       const oldUser = {
         email: 'bs@old.com',
         verified: true,
-      };
-      const editProfileArgs = {
-        userId: 1,
-        input: { email: 'bs@new.com' },
       };
       const newVerification = {
         code: 'code',
@@ -265,6 +266,36 @@ describe('UserService', () => {
       );
     });
 
+    it('should delete previous verification if edit email via not verified email', async () => {
+      const existingVerification = {
+        id: 1,
+        code: 'oldCode',
+      };
+      const oldUser = {
+        email: 'bs@old.com',
+        verified: false,
+      };
+
+      usersRepository.findOne.mockResolvedValue(oldUser);
+      verificationsRepository.findOne.mockResolvedValue(existingVerification);
+      verificationsRepository.delete.mockResolvedValue(null);
+
+      await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
+
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledWith(
+        editProfileArgs.userId,
+      );
+      expect(verificationsRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.findOne).toHaveBeenCalledWith(
+        expect.any(Object),
+      );
+      expect(verificationsRepository.delete).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.delete).toHaveBeenCalledWith(
+        expect.any(Object),
+      );
+    });
+
     it('should change password', async () => {
       const editProfileArgs = {
         userId: 1,
@@ -286,9 +317,9 @@ describe('UserService', () => {
     it('should change role', async () => {
       const editProfileArgs = {
         userId: 1,
-        input: { role: 1 },
+        input: { role: UserRole.Owner },
       };
-      usersRepository.findOne.mockResolvedValue({ role: 0 });
+      usersRepository.findOne.mockResolvedValue({ role: UserRole.Client });
       const result = await service.editProfile(
         editProfileArgs.userId,
         editProfileArgs.input,
