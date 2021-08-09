@@ -56,6 +56,7 @@ export class RestaurantService {
       return {
         ok: true,
         error: null,
+        restaurantId: newRestaurant.id,
       };
     } catch (error) {
       return {
