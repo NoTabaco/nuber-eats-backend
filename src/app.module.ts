@@ -66,7 +66,7 @@ import { UploadsModule } from './uploads/uploads.module';
         OrderItem,
         Payment,
       ],
-      synchronize: process.env.NODE_ENV !== 'production',
+      synchronize: true,
       logging: false,
     }),
     GraphQLModule.forRoot({
