@@ -27,9 +27,9 @@ import { UploadsModule } from './uploads/uploads.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
-      ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'prod', 'test').required(),
+        NODE_ENV: Joi.string().valid('dev', 'production', 'test').required(),
         DATABASE_URL: Joi.string(),
         DB_HOST: Joi.string(),
         DB_PORT: Joi.string(),
@@ -66,11 +66,11 @@ import { UploadsModule } from './uploads/uploads.module';
         OrderItem,
         Payment,
       ],
-      synchronize: process.env.NODE_ENV !== 'prod',
+      synchronize: process.env.NODE_ENV !== 'production',
       logging: false,
     }),
     GraphQLModule.forRoot({
-      playground: process.env.NODE_ENV !== 'prod',
+      playground: process.env.NODE_ENV !== 'production',
       installSubscriptionHandlers: true,
       autoSchemaFile: true,
       context: ({ req, connection }) => {
